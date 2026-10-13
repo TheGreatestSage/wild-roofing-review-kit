@@ -304,10 +304,10 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);display
         </div>
         <div class="actions">
           <button type="button" class="btn" id="btnCopy">Copy message</button>
-          <a class="btn" id="btnOpen" href="sms:">Open in Messages</a>
+          <a class="btn" id="btnOpen" href="openphone://message">Open in Quo</a>
           <button type="submit" class="btn primary" id="btnLog">Log ask</button>
         </div>
-        <p class="fine" id="formNote">Log ask saves the ask on this phone; it doesn’t send anything. Send the message first, then tap Log ask. If Open in Messages does nothing, use Copy.</p>
+        <p class="fine" id="formNote">Log ask saves the ask on this phone; it doesn’t send anything. Send the message in Quo first, then tap Log ask. Open in Quo needs the Quo app on this phone; if nothing opens, use Copy.</p>
       </form>
     </section>
 
@@ -381,7 +381,7 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);display
     </div>
     <ol class="routine">
       <li><span class="day">Day 0 · walkthrough</span><div><h3>Hand the card</h3><p>Give the review card with the closeout paperwork and say the line. Then move on. Don’t wait while they write.</p></div></li>
-      <li><span class="day">Day 0 · evening</span><div><h3>Send the text</h3><p>Text the link, or email it if they don’t text. Log it here so the reminder lands on time.</p></div></li>
+      <li><span class="day">Day 0 · evening</span><div><h3>Send the text</h3><p>Text the link from Quo, or email it if they don’t text. Log it here so the reminder lands on time.</p></div></li>
       <li><span class="day">Day 4</span><div><h3>One reminder</h3><p>No review yet? Send the reminder once and mark it reminded.</p></div></li>
       <li><span class="day">Day 10</span><div><h3>Close it out</h3><p>Still nothing? Mark it closed. Never ask a third time.</p></div></li>
       <li><span class="day">Review posts</span><div><h3>Reply on Google</h3><p>Mark it reviewed and reply within 2 business days, good or bad.</p></div></li>
@@ -565,10 +565,16 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);display
     return { first: first, sender: sender || 'the team', signoff: sender || 'The Wild Roofing team', link: REVIEW_URL };
   }
   function digits(s) { return String(s || '').replace(/\D/g, ''); }
-  var appleish = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
-  function smsHref(num, body) {
-    var d = digits(num); if (d.length === 10) d = '1' + d;
-    return 'sms:' + (d ? '+' + d : '') + (appleish ? '&' : '?') + 'body=' + encodeURIComponent(body);
+  // Opens the Quo (formerly OpenPhone) mobile app with the number and message filled in.
+  // Sends from whichever Quo line is selected in the app. Quo's links work in its iOS and Android apps only.
+  function quoHref(num, body) {
+    var d = digits(num), q = [];
+    if (d.length === 10) d = '+1' + d;
+    else if (d.length === 11 && d.charAt(0) === '1') d = '+' + d;
+    if (d) q.push('number=' + encodeURIComponent(d));
+    q.push('text=' + encodeURIComponent(body));
+    q.push('selectedAsFallback=true');
+    return 'openphone://message?' + q.join('&');
   }
   function mailHref(addr, subject, body) {
     var a = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(String(addr || '').trim()) ? String(addr).trim() : '';
@@ -635,7 +641,7 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);display
   }
   function updateOpen() {
     if (channel === 'email') { btnOpen.href = mailHref(fContact.value, fSubject.value, fMsg.value); btnOpen.textContent = 'Open in Mail'; }
-    else { btnOpen.href = smsHref(fContact.value, fMsg.value); btnOpen.textContent = 'Open in Messages'; }
+    else { btnOpen.href = quoHref(fContact.value, fMsg.value); btnOpen.textContent = 'Open in Quo'; }
   }
   function setChannel(c) {
     channel = c; msgDirty = false; subjDirty = false;
@@ -745,7 +751,7 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);display
       var fb = el('pre', 'fallback', text); fb.hidden = true;
       acts.appendChild(btn('Copy reminder', '', function () { copyText(text, fb); }));
       if (a.channel !== 'email' && digits(a.contact).length >= 10) {
-        var link = el('a', 'btn', 'Open in Messages'); link.href = smsHref(a.contact, text); acts.appendChild(link);
+        var link = el('a', 'btn', 'Open in Quo'); link.href = quoHref(a.contact, text); acts.appendChild(link);
       }
       if (a.channel === 'email' && /@/.test(a.contact || '')) {
         var mail = el('a', 'btn', 'Open in Mail'); mail.href = mailHref(a.contact, fill(TPL.subject, vals(a.name, fSender.value)), text); acts.appendChild(mail);

@@ -7,6 +7,7 @@ Served at **https://reviews.wildroofing.com** through GitHub Pages once Pages an
 ## Files
 
 - `index.html` is the whole kit in one page. Each phone keeps its own review log in its browser; nothing is stored on a server.
+- Texts open in the Quo mobile app (`openphone://message` link) with the customer's number and message filled in, sent from whichever Quo line is selected in the app. Email still opens the phone's mail app.
 - `CNAME` sets the custom domain for GitHub Pages.
 - `site.webmanifest`, `apple-touch-icon.png` and `icon-192.png` let the page install to a phone's Home Screen.
 
